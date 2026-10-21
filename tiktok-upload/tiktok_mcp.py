@@ -127,7 +127,8 @@ def connect(account):
 def post_video(account, video_path, caption, privacy="SELF_ONLY"):
     token = access_token(account)
     size = os.path.getsize(video_path)
-    total = max(1, -(-size // CHUNK))
+    # TikTok: total_chunk_count = floor(size / chunk_size); the last chunk takes the remainder.
+    total = max(1, size // CHUNK)
     chunk_size = size if total == 1 else CHUNK
     init = _post_json(f"{API}/v2/post/publish/video/init/", {
         "post_info": {"title": caption[:2200], "privacy_level": privacy,
@@ -140,7 +141,8 @@ def post_video(account, video_path, caption, privacy="SELF_ONLY"):
     upload_url = init["data"]["upload_url"]
     with open(video_path, "rb") as f:
         for i in range(total):
-            data = f.read(chunk_size)
+            n = chunk_size if i < total - 1 else size - i * chunk_size
+            data = f.read(n)
             start, end = i * chunk_size, i * chunk_size + len(data) - 1
             req = urllib.request.Request(upload_url, data=data, method="PUT", headers={
                 "Content-Type": "video/mp4",
