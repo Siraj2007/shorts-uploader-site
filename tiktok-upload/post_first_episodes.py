@@ -35,3 +35,5 @@ for account, path, caption in POSTS:
         print("status:", t.publish_status(account, result["publish_id"]))
     except Exception as e:
         print("FAILED:", e)
+        if hasattr(e, "read"):
+            print("TikTok said:", e.read().decode(errors="replace"))
