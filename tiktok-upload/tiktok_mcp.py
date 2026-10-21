@@ -87,7 +87,7 @@ def connect(account):
     state = secrets.token_urlsafe(16)
     # PKCE: TikTok requires a code_challenge; the verifier is sent back at token exchange.
     verifier = secrets.token_urlsafe(64)
-    challenge = base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest()).decode().rstrip("=")
+    challenge = hashlib.sha256(verifier.encode()).hexdigest()  # TikTok uses hex SHA-256, not base64url
     url = "https://www.tiktok.com/v2/auth/authorize/?" + urllib.parse.urlencode({
         "client_key": CLIENT_KEY, "scope": SCOPES, "response_type": "code",
         "redirect_uri": REDIRECT_URI, "state": f"{account}|{state}",
